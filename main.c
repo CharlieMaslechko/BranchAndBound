@@ -51,11 +51,11 @@ void deletePartial(struct PartialSolution *givenSolution){
 }
 
 //returns the index of number in an array
-int getMinIndex(int *x){
-    int min = 0;
-    for (int i = 1; i < amountOfPeople; i++){
-        if (x[i] < x[min]){
-             min = i;
+int getMinNum(int *x){
+    int min = x[0];
+    for (int i = 0; i < amountOfPeople; i++){
+        if (x[i] < min){
+             min = x[i];
         }
     }
     return min;
@@ -99,25 +99,31 @@ int getCSF(struct PartialSolution *givenSolution){
      for (int i = 0; i < lastIndex+1; i++){
        struct Person *currentPerson = Persons[i];
         //To get cost of task x get from task[x] from y person
-        //The reason it is i-1 is since we want to input what is the cost of t
+        //The reason it is -1 is since we are pulling from a list that says if a person assigned a task from 1 -> 5
         csf += currentPerson->tasks[givenSolution->taskAssignments[i] - 1];
      }
+     printf("\nCSF WAS COMPUTED AS: %D\n", csf);
      return csf;
+     
 }
 
 //given a partial get GFC
 int getGFC(struct PartialSolution *givenSolution){
+    
+    int gfc = 0;
+    //now extrapolate the mins for the remainder of the list
     int lastIndex = getLastAssignedTask(givenSolution->taskAssignments);
-    int amount = lastIndex + 1;
-    int blackList[amount];
-    printf("\n\nBLACK LIST these are tasks that are set in stone: ");
-    for (int i = 0; i < lastIndex + 1; i++){
-        blackList[i] = givenSolution->taskAssignments[i];
-    }
-    //Now we have a set of tasks that cant be chosen from
-    
-    
-    return 0;
+    if (lastIndex == 4){
+        return gfc;
+    }else{
+        for (int i = lastIndex + 1; i < 5; i++){
+            struct Person *currentPerson = Persons[i];
+            printf("\nMIN FOR PERSON %d is %d\n", i+1, getMinNum(currentPerson->tasks));
+            gfc += getMinNum(currentPerson->tasks);
+        }
+    }   
+     printf("\nGFC WAS COMPUTED AS: %D\n", gfc);
+    return gfc;
 }
 
 //Given a partial solution get the lower and upperbound
@@ -161,9 +167,8 @@ int main(int argc, char **argv){
     printf("====================");
     //if I create a partial solution
     //Assign task 3 to person 1
-    int partial[5] = {3, 2, -1, -1, -1};
+    int partial[5] = {1, 3, -1, -1, -1};
     struct PartialSolution* newPartial = createPartial(partial);
     printPartial(newPartial);
-    printf("CSF IS: %d", getGFC(newPartial));
-    
+    printf("LP IS: %d", getGFC(newPartial) + getCSF(newPartial));
 }
